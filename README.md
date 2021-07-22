@@ -2,10 +2,6 @@ This is a guide to using [YubiKey](https://www.yubico.com/products/yubikey-hardw
 
 Keys stored on YubiKey are [non-exportable](https://support.yubico.com/support/solutions/articles/15000010242-can-i-duplicate-or-back-up-a-yubikey-) (as opposed to file-based keys that are stored on disk) and are convenient for everyday use. Instead of having to remember and enter passphrases to unlock SSH/GPG keys, YubiKey needs only a physical touch after being unlocked with a PIN. All signing and encryption operations happen on the card, rather than in OS memory.
 
-**New!** [drduh/Purse](https://github.com/drduh/Purse) is a password manager which uses GPG and YubiKey.
-
-**Security Note**: If you followed this guide before Jan 2021, your PUK (Pin Unblock Key) may be set to its default value of `12345678`. An attacker can use this to reset your PIN and use your Yubikey. Please see the [Change PUK](#change-puk) section for details on how to change your PUK.
-
 If you have a comment or suggestion, please open an [Issue](https://github.com/drduh/YubiKey-Guide/issues) on GitHub.
 
 - [Purchase](#purchase)
