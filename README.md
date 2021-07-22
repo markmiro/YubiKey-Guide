@@ -12,12 +12,7 @@ If you have a comment or suggestion, please open an [Issue](https://github.com/d
 - [Prepare environment](#prepare-environment)
 - [Required software](#required-software)
   * [Debian and Ubuntu](#debian-and-ubuntu)
-  * [Arch](#arch)
-  * [RHEL7](#rhel7)
-  * [NixOS](#nixos)
-  * [OpenBSD](#openbsd)
   * [macOS](#macos)
-  * [Windows](#windows)
 - [Entropy](#entropy)
 - [Creating keys](#creating-keys)
   * [Temporary working directory](#temporary-working-directory)
@@ -240,90 +235,6 @@ $ sudo service pcscd start
 
 $ ~/.local/bin/ykman openpgp info
 ```
-
-## Arch
-
-```console
-$ sudo pacman -Syu gnupg pcsclite ccid hopenpgp-tools yubikey-personalization
-```
-
-## RHEL7
-
-```console
-$ sudo yum install -y gnupg2 pinentry-curses pcsc-lite pcsc-lite-libs gnupg2-smime
-```
-
-## NixOS
-
-Generate a NixOS LiveCD image with the given config:
-
-```nix
-# yubikey-installer.nix
-{ nixpkgs ? <nixpkgs>, system ? "x86_64-linux" } :
-
-let
-  config = { pkgs, ... }:
-  with pkgs; {
-    imports = [ <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-graphical-kde.nix> ];
-
-    boot.kernelPackages = linuxPackages_latest;
-
-    services.pcscd.enable = true;
-    services.udev.packages = [ yubikey-personalization ];
-
-    environment.systemPackages = [ gnupg pinentry-curses pinentry-qt paperkey wget ];
-
-    programs = {
-      ssh.startAgent = false;
-      gnupg.agent = {
-        enable = true;
-        enableSSHSupport = true;
-      };
-    };
-  };
-
-  evalNixos = configuration: import <nixpkgs/nixos> {
-    inherit system configuration;
-  };
-
-in {
-  iso = (evalNixos config).config.system.build.isoImage;
-}
-```
-
-Build the installer and copy it to a USB drive.
-
-```console
-$ nix build -f yubikey-installer.nix --out-link installer
-
-$ sudo cp -v installer/iso/*.iso /dev/sdb; sync
-'installer/iso/nixos-20.03.git.c438ce1-x86_64-linux.iso' -> '/dev/sdb'
-```
-
-On NixOS, ensure that you have `pinentry-program /run/current-system/sw/bin/pinentry-curses` in your `$GNUPGHOME/gpg-agent.conf` before running any `gpg` commands.
-
-
-## OpenBSD
-
-```console
-$ doas pkg_add gnupg pcsc-tools
-```
-
-## macOS
-
-Download and install [Homebrew](https://brew.sh/) and the following packages:
-
-```console
-$ brew install gnupg yubikey-personalization hopenpgp-tools ykman pinentry-mac
-```
-
-**Note** An additional Python package dependency may need to be installed to use [`ykman`](https://support.yubico.com/support/solutions/articles/15000012643-yubikey-manager-cli-ykman-user-guide) - `pip install yubikey-manager`
-
-## Windows
-
-Download and install [Gpg4Win](https://www.gpg4win.org/) and [PuTTY](https://putty.org).
-
-You may also need more recent versions of [yubikey-personalization](https://developers.yubico.com/yubikey-personalization/Releases/) and [yubico-c](https://developers.yubico.com/yubico-c/Releases/).
 
 # Entropy
 
