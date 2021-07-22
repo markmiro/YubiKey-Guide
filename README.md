@@ -78,7 +78,7 @@ If you have a comment or suggestion, please open an [Issue](https://github.com/d
 
 # Purchase
 
-All YubiKeys except the blue "security key" model are compatible with this guide. NEO models are limited to 2048-bit RSA keys. Compare YubiKeys [here](https://www.yubico.com/products/yubikey-hardware/compare-products-series/).
+I'm using the YubiKey 5C and 5Ci
 
 To verify a YubiKey is genuine, open a [browser with U2F support](https://support.yubico.com/support/solutions/articles/15000009591-how-to-confirm-your-yubico-device-is-genuine-with-u2f) to [https://www.yubico.com/genuine/](https://www.yubico.com/genuine/). Insert a Yubico device, and select *Verify Device* to begin the process. Touch the YubiKey when prompted, and if asked, allow it to see the make and model of the device. If you see *Verification complete*, the device is authentic.
 
@@ -97,93 +97,6 @@ To create cryptographic keys, a secure environment that can be reasonably assure
 1. Secure hardware/firmware ([Coreboot](https://www.coreboot.org/), [Intel ME removed](https://github.com/corna/me_cleaner))
 
 1. Dedicated air-gapped system with no networking capabilities
-
-This guide recommends using a bootable "live" Debian Linux image to provide such an environment, however, depending on your threat model, you may want to take fewer or more steps to secure it.
-
-To use Debian Live, download the latest image:
-
-```console
-$ curl -LfO https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/SHA512SUMS
-
-$ curl -LfO https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/SHA512SUMS.sign
-
-$ curl -LfO https://cdimage.debian.org/debian-cd/current-live/amd64/iso-hybrid/$(awk '/xfce.iso/ {print $2}' SHA512SUMS)
-```
-
-Verify the signature of the hashes file with GPG:
-
-```console
-$ gpg --verify SHA512SUMS.sign SHA512SUMS
-gpg: Signature made Sat 09 May 2020 05:17:57 PM PDT
-gpg:                using RSA key DF9B9C49EAA9298432589D76DA87E80D6294BE9B
-gpg: Can't check signature: No public key
-
-$ gpg --keyserver hkps://keyring.debian.org --recv DF9B9C49EAA9298432589D76DA87E80D6294BE9B
-gpg: key 0xDA87E80D6294BE9B: public key "Debian CD signing key <debian-cd@lists.debian.org>" imported
-gpg: Total number processed: 1
-gpg:               imported: 1
-
-$ gpg --verify SHA512SUMS.sign SHA512SUMS
-gpg: Signature made Sat 09 May 2020 05:17:57 PM PDT
-gpg:                using RSA key DF9B9C49EAA9298432589D76DA87E80D6294BE9B
-gpg: Good signature from "Debian CD signing key <debian-cd@lists.debian.org>" [unknown]
-gpg: WARNING: This key is not certified with a trusted signature!
-gpg:          There is no indication that the signature belongs to the owner.
-Primary key fingerprint: DF9B 9C49 EAA9 2984 3258  9D76 DA87 E80D 6294 BE9B
-```
-
-If the public key cannot be received, try changing the DNS resolver and/or use a different keyserver:
-
-```console
-$ gpg --keyserver hkps://keyserver.ubuntu.com:443 --recv DF9B9C49EAA9298432589D76DA87E80D6294BE9B
-```
-
-Ensure the SHA512 hash of the live image matches the one in the signed file.
-
-```console
-$ grep $(sha512sum debian-live-*-amd64-xfce.iso) SHA512SUMS
-SHA512SUMS:799ec1fdb098caa7b60b71ed1fdb1f6390a1c6717b4314265e7042fa271c84f67fff0d0380297f60c4bcd0c1001e08623ab3d2a2ad64079d83d1795c40eb7a0a  debian-live-10.5.0-amd64-xfce.iso
-```
-
-See [Verifying authenticity of Debian CDs](https://www.debian.org/CD/verify) for more information.
-
-Mount a storage device and copy the image to it:
-
-**Linux**
-
-```console
-$ sudo dmesg | tail
-usb-storage 3-2:1.0: USB Mass Storage device detected
-scsi host2: usb-storage 3-2:1.0
-scsi 2:0:0:0: Direct-Access     TS-RDF5  SD  Transcend    TS3A PQ: 0 ANSI: 6
-sd 2:0:0:0: Attached scsi generic sg1 type 0
-sd 2:0:0:0: [sdb] 31116288 512-byte logical blocks: (15.9 GB/14.8 GiB)
-sd 2:0:0:0: [sdb] Write Protect is off
-sd 2:0:0:0: [sdb] Mode Sense: 23 00 00 00
-sd 2:0:0:0: [sdb] Write cache: disabled, read cache: enabled, doesn't support DPO or FUA
-sdb: sdb1 sdb2
-sd 2:0:0:0: [sdb] Attached SCSI removable disk
-
-$ sudo dd if=debian-live-10.4.0-amd64-xfce.iso of=/dev/sdb bs=4M; sync
-465+1 records in
-465+1 records out
-1951432704 bytes (2.0 GB, 1.8 GiB) copied, 42.8543 s, 45.5 MB/s
-```
-
-**OpenBSD**
-
-```console
-$ dmesg | tail -n2
-sd2 at scsibus4 targ 1 lun 0: <TS-RDF5, SD Transcend, TS3A> SCSI4 0/direct removable serial.0000000000000
-sd2: 15193MB, 512 bytes/sector, 31116288 sectors
-
-$ doas dd if=debian-live-10.4.0-amd64-xfce.iso of=/dev/rsd2c bs=4m
-465+1 records in
-465+1 records out
-1951432704 bytes transferred in 139.125 secs (14026448 bytes/sec)
-```
-
-Shut down the computer and disconnect internal hard drives and all unnecessary peripheral devices. If being run within a VM, this part can be skipped as no such devices should be attached to the VM since the image will still be run as a "live image".
 
 # Required software
 
